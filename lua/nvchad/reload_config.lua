@@ -4,15 +4,17 @@ local M = {}
 
 local fn = vim.fn
 local cmd = vim.cmd
+local project_site = vim.g.project_site
+local project_config = vim.g.project_config
 
 local Path = require "plenary.path"
 local scan_dir = require("plenary.scandir").scan_dir
 
 -- Paths to unload Lua modules from
-M.lua_reload_dirs = { fn.stdpath "config" }
+M.lua_reload_dirs = { project_config }
 
 -- Paths to reload Vim files from
-M.vim_reload_dirs = { fn.stdpath "config", fn.stdpath "data" .. "/site/pack/*/start/*" }
+M.vim_reload_dirs = { project_config, project_site .. "/pack/*/start/*" }
 
 -- External files outside the runtimepaths to source
 M.files_reload_external = {}
@@ -203,9 +205,9 @@ function M.Restart()
    -- Setting Theme
    M.set_theme()
    -- Source init files
-   cmd "luafile ~/.config/nvim/lua/chadrc.lua"
-   cmd "luafile ~/.config/nvim/lua/plugins/init.lua"
-   cmd "luafile ~/.config/nvim/lua/colors/init.lua"
+   cmd ("luafile " .. project_config .. "/nvim/lua/chadrc.lua")
+   cmd ("luafile " .. project_config .. "/nvim/lua/plugins/init.lua")
+   cmd ("luafile " .. project_config .. "/nvim/lua/colors/init.lua")
    -- Installing  or Cleaning on changes
    cmd "PackerClean"
    cmd "PackerInstall"

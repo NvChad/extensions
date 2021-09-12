@@ -125,7 +125,7 @@ local function theme_switcher(opts)
       -- launch the telescope picker
       picker:find()
    else
-      print("No themes found in " .. vim.fn.stdpath "config" .. "/lua/themes")
+      print("No themes found in " .. vim.g.project_config .. "/lua/themes")
    end
 end
 

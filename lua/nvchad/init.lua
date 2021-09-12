@@ -1,4 +1,5 @@
 local M = {}
+local project_site = vim.g.project_site
 
 -- Edit user config file, based on the assumption it exists in the config as
 -- theme = "theme name"
@@ -48,7 +49,7 @@ end
 M.list_themes = function(return_type)
    local themes = {}
    -- folder where theme files are stored
-   local themes_folder = vim.fn.stdpath "data" .. "/site/pack/packer/opt/nvim-base16.lua/lua/hl_themes"
+   local themes_folder = project_site .. "/pack/packer/opt/nvim-base16.lua/lua/hl_themes"
    -- list all the contents of the folder and filter out files with .lua extension, then append to themes table
    local fd = vim.loop.fs_scandir(themes_folder)
    if fd then
