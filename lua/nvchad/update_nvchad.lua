@@ -42,6 +42,17 @@ local function update()
       echo { { "Warn: local UNstaged changes found and committed to local '" .. update_branch .. "' branch", "WarningMsg" } }
    end
 
+   -- record roll-back point: NvChad_rollback
+   vim.fn.system("git -C " .. config_path .. " tag NvChad_rollback" )
+   if vim.api.nvim_get_vvar "shell_error" ~= 0 then
+      vim.fn.system([[ [ "$(git -C ]] .. config_path ..  [[ rev-parse HEAD)" == "$(git -C ]] ..  config_path .. [[ rev-parse NvChad_rollback)" ] ]] )
+      if vim.api.nvim_get_vvar "shell_error" ~= 0 then
+         -- no error is expected to reach here.
+         echo { { "Error: git tag 'NvChad_rollback' can't be recorded at HEAD for some reason.\n", "ErrorMsg" } }
+         do return end
+      end
+   -- if already exist at HEAD, be happy too
+   end
    -- define update_script which uses --rebase to allow merging of local modifications to non-chadrc files
    local update_script = "git pull --rebase --set-upstream " .. update_url .. " " .. update_branch
 
@@ -52,11 +63,20 @@ local function update()
          vim.cmd "bd!"
          echo { { "NvChad successfully updated with 'git pull --rebase ...'.\n", "String" } }
       else
-         echo { { "Error: NvChad Update of configuration created merge conflict.\n", "ErrorMsg" } }
-         echo { { "       Please resolve merge conflicts and commit cleanly merged contents to\n"} }
-         echo { { "       HEAD of local git branch: '" .. update_branch .. "'.\n" } }
-         echo { { "       Configuration path: '" .. config_path "' and subdirectories.\n" } }
-         echo { { "       Run 'git diff --name-only --diff-filter=U' to list files.\n\n" } }
+         echo { { "Warn: NvChad Update experienced merge conflicts in '" .. update_branch .. "' branch", "WarningMsg" } }
+         vim.fn.system("git -C " .. config_path .. " reset --hard NvChad_rollback")
+         if vim.api.nvim_get_vvar "shell_error" ~= 0 then
+            -- no error is expected to reach here.
+            echo { { "Error: git reset --hard 'NvChad_rollback' exits error for some reason.\n", "ErrorMsg" } }
+            do return end
+         end
+         echo { { "Warn: NvChad Update rolled back.  Please resolve conflict manually.", "WarningMsg" } }
+      end
+      vim.fn.system("git -C " .. config_path .. " tag -d NvChad_rollback")
+      if vim.api.nvim_get_vvar "shell_error" ~= 0 then
+         -- no error is expected to reach here.
+         echo { { "Error: git tag -d 'NvChad_rollback' exits error for some reason.\n", "ErrorMsg" } }
+         do return end
       end
    end
 
